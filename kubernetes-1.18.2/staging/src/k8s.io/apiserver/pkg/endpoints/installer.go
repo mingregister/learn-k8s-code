@@ -93,6 +93,7 @@ var toDiscoveryKubeVerb = map[string]string{
 func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []error) {
 	var apiResources []metav1.APIResource
 	var errors []error
+	// mingregister-配置服务路由(202005101652): 设置WebService对应的路径为a.prefix，即形如/apis/apiextensions.k8s.io/v1beta1/的路径
 	ws := a.newWebService()
 
 	// Register the paths in a deterministic (sorted) order to get a deterministic swagger spec.
@@ -104,6 +105,7 @@ func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []e
 	}
 	sort.Strings(paths)
 	for _, path := range paths {
+		// mingregister-配置服务路由(202005101653): 分别为Storage中的各资源，形如"customresourcedefinitions"、"customresourcedefinitions/status"，配置对应的CRUD路径即对应处理逻辑，进入下一层逻辑
 		apiResource, err := a.registerResourceHandlers(path, a.group.Storage[path], ws)
 		if err != nil {
 			errors = append(errors, fmt.Errorf("error in registering resource: %s, %v", path, err))
@@ -178,6 +180,7 @@ func GetResourceKind(groupVersion schema.GroupVersion, storage rest.Storage, typ
 	return fqKindToRegister, nil
 }
 
+// mingregister- InteractiveWithEtcd(202005101830): kube-apiserver与后端ETCD交互的逻辑入口为配置api路由的终端registerResourceHandlers。
 func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
 	admit := a.group.Admit
 
@@ -618,6 +621,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		verbOverrider, needOverride := storage.(StorageMetricsOverride)
 
 		switch action.Verb {
+		// mingregister- InteractiveWithEtcd(202005101832): 可支持的操作"动作"?
 		case "GET": // Get a resource.
 			var handler restful.RouteFunction
 			if isGetterWithOptions {
@@ -655,7 +659,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				}
 			}
 			addParams(route, action.Params)
+			// mingregister-配置服务路由(202005101655): 将各route汇集
 			routes = append(routes, route)
+		// mingregister- InteractiveWithEtcd(202005101832): 可支持的操作"动作"?
 		case "LIST": // List all resources of a kind.
 			doc := "list objects of kind " + kind
 			if isSubresource {
@@ -897,6 +903,8 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		default:
 			return nil, fmt.Errorf("unrecognized action verb: %s", action.Verb)
 		}
+		
+		// mingregister-配置服务路由(202005101656): 将所有route映射到对应的WebService中
 		for _, route := range routes {
 			route.Metadata(ROUTE_META_GVK, metav1.GroupVersionKind{
 				Group:   reqScope.Kind.Group,
@@ -1135,6 +1143,7 @@ func restfulGetResource(r rest.Getter, e rest.Exporter, scope handlers.RequestSc
 	}
 }
 
+// mingregister- InteractiveWithEtcd(202005101834): 这里有很多操作哦。
 func restfulGetResourceWithOptions(r rest.GetterWithOptions, scope handlers.RequestScope, isSubresource bool) restful.RouteFunction {
 	return func(req *restful.Request, res *restful.Response) {
 		handlers.GetResourceWithOptions(r, &scope, isSubresource)(res.ResponseWriter, req.Request)

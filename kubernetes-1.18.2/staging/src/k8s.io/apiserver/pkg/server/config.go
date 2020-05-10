@@ -289,6 +289,7 @@ func NewConfig(codecs serializer.CodecFactory) *Config {
 	defaultHealthChecks := []healthz.HealthChecker{healthz.PingHealthz, healthz.LogHealthz}
 	return &Config{
 		Serializer:                  codecs,
+		// mingregister-AccessControl(202005101746): 访问控制的逻辑链在这里被传入
 		BuildHandlerChainFunc:       DefaultBuildHandlerChain,
 		HandlerChainWaitGroup:       new(utilwaitgroup.SafeWaitGroup),
 		LegacyAPIGroupPrefixes:      sets.NewString(DefaultLegacyAPIPrefix),
@@ -534,6 +535,7 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	handlerChainBuilder := func(handler http.Handler) http.Handler {
 		return c.BuildHandlerChainFunc(handler, c.Config)
 	}
+	// mingregister-AccessControl(202005101740): 在构建对于的handler时，将访问控制相应的逻辑加进去
 	apiServerHandler := NewAPIServerHandler(name, c.Serializer, handlerChainBuilder, delegationTarget.UnprotectedHandler())
 
 	s := &GenericAPIServer{
@@ -661,6 +663,7 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	return s, nil
 }
 
+// mingregister-AccessControl(202005101748): 在kube-apiserver中，一个handler在诞生之初会根据配置为其赋予相应的访问控制逻辑，这里我们主要看看权限验证及鉴权两块，即Authorization和Authentication。
 func DefaultBuildHandlerChain(apiHandler http.Handler, c *Config) http.Handler {
 	handler := genericapifilters.WithAuthorization(apiHandler, c.Authorization.Authorizer, c.Serializer)
 	if c.FlowControl != nil {

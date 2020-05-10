@@ -56,6 +56,7 @@ func WithAuthorization(handler http.Handler, a authorizer.Authorizer, s runtime.
 			responsewriters.InternalError(w, req, err)
 			return
 		}
+		// mingregister-AccessControl(202005101757): 逻辑为对传入的对应访问控制的入参进行判断，通过则进行对应的请求处理，否则返回权限错误
 		authorized, reason, err := a.Authorize(ctx, attributes)
 		// an authorizer like RBAC could encounter evaluation errors and still allow the request, so authorizer decision is checked before error here.
 		if authorized == authorizer.DecisionAllow {
@@ -69,7 +70,7 @@ func WithAuthorization(handler http.Handler, a authorizer.Authorizer, s runtime.
 			responsewriters.InternalError(w, req, err)
 			return
 		}
-
+		// mingregister-(202005101800): 如果上面的已经return了，那这里不是不会执行了么?日志还怎么记录?
 		klog.V(4).Infof("Forbidden: %#v, Reason: %q", req.RequestURI, reason)
 		audit.LogAnnotation(ae, decisionAnnotationKey, decisionForbid)
 		audit.LogAnnotation(ae, reasonAnnotationKey, reason)

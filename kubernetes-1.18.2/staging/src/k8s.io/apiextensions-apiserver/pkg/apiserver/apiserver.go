@@ -138,10 +138,10 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	}
 
 	apiResourceConfig := c.GenericConfig.MergedResourceConfig
-	// mingregister(202005101347): 将这组api的GroupName设置为apiextensions.k8s.io 
+	// mingregister-配置服务路由(202005101347): 将这组api的GroupName设置为apiextensions.k8s.io 
 	// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiextensions-apiserver\pkg\apis\apiextensions\register.go
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(apiextensions.GroupName, Scheme, metav1.ParameterCodec, Codecs)
-	// mingregister(202005101348): 根据配置情况，装填对应资源的CRUD后端交互结构体
+	// mingregister-配置服务路由(202005101348): 根据配置情况，装填对应资源的CRUD后端交互结构体
 	if apiResourceConfig.VersionEnabled(v1beta1.SchemeGroupVersion) {
 		storage := map[string]rest.Storage{}
 		// customresourcedefinitions
@@ -161,7 +161,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		apiGroupInfo.VersionedResourcesStorageMap[v1.SchemeGroupVersion.Version] = storage
 	}
 
-	// mingregister(202005101348): 转入下一步逻辑
+	// mingregister-配置服务路由(202005101348): 转入下一步逻辑
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err
 	}

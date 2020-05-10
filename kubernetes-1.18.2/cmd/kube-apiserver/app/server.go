@@ -152,19 +152,19 @@ func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) erro
 	// To help debugging, immediately log version
 	klog.Infof("Version: %+v", version.Get())
 
-	// mingregister(202005101328): 创建kube-apiserver服务链，配置各api路由的逻辑
+	// mingregister-配置服务路由(202005101328): 创建kube-apiserver服务链，配置各api路由的逻辑
 	server, err := CreateServerChain(completeOptions, stopCh)
 	if err != nil {
 		return err
 	}
 
-	// mingregister(202005101331): kube-apiserver服务运行前的准备，如设置健康检查和存活检查等操作。
+	// mingregister-配置服务路由(202005101331): kube-apiserver服务运行前的准备，如设置健康检查和存活检查等操作。
 	prepared, err := server.PrepareRun()
 	if err != nil {
 		return err
 	}
 
-	// mingregister(202005101331): 正式运行kube-apiserver服务。
+	// mingregister-配置服务路由(202005101331): 正式运行kube-apiserver服务。
 	return prepared.Run(stopCh)
 }
 
@@ -186,13 +186,13 @@ func CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan
 	if err != nil {
 		return nil, err
 	}
-	// mingregister(202005101333): 	启动CustomResourceDefinitions对应的服务, 创建CustomResourceDefinitions对应的服务，配置对应api的路由(/apis/apiextensions.k8s.io/)。
+	// mingregister-配置服务路由(202005101333): 	启动CustomResourceDefinitions对应的服务, 创建CustomResourceDefinitions对应的服务，配置对应api的路由(/apis/apiextensions.k8s.io/)。
 	apiExtensionsServer, err := createAPIExtensionsServer(apiExtensionsConfig, genericapiserver.NewEmptyDelegate())
 	if err != nil {
 		return nil, err
 	}
 
-	// mingregister(202005101335): 启动kube-apiserver的api服务. 创建kube-apiserver的api服务，配置/api和/apis根路径下的路由
+	// mingregister-配置服务路由(202005101335): 启动kube-apiserver的api服务. 创建kube-apiserver的api服务，配置/api和/apis根路径下的路由
 	kubeAPIServer, err := CreateKubeAPIServer(kubeAPIServerConfig, apiExtensionsServer.GenericAPIServer)
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan
 	if err != nil {
 		return nil, err
 	}
-	// mingregister(202005101336): 启动聚合服务. 创建聚合服务，聚合在kube-apiserver之外的拓展apiserver
+	// mingregister-配置服务路由(202005101336): 启动聚合服务. 创建聚合服务，聚合在kube-apiserver之外的拓展apiserver
 	aggregatorServer, err := createAggregatorServer(aggregatorConfig, kubeAPIServer.GenericAPIServer, apiExtensionsServer.Informers)
 	if err != nil {
 		// we don't need special handling for innerStopCh because the aggregator server doesn't create any go routines
@@ -275,6 +275,7 @@ func CreateNodeDialer(s completedServerRunOptions) (tunneler.Tunneler, *http.Tra
 	return nodeTunneler, proxyTransport, nil
 }
 
+// mingregister-AccessControl(202005101744): 在起初创建kube-apiserver的配置时，相应访问控制的逻辑链就被引入
 // CreateKubeAPIServerConfig creates all the resources for running the API server, but runs none of them
 func CreateKubeAPIServerConfig(
 	s completedServerRunOptions,
@@ -504,12 +505,14 @@ func buildGenericConfig(
 	}
 	versionedInformers = clientgoinformers.NewSharedInformerFactory(clientgoExternalClient, 10*time.Minute)
 
+	// mingregister-AccessControl(202005101750): 构建鉴权相关配置
 	genericConfig.Authentication.Authenticator, genericConfig.OpenAPIConfig.SecurityDefinitions, err = BuildAuthenticator(s, genericConfig.EgressSelector, clientgoExternalClient, versionedInformers)
 	if err != nil {
 		lastErr = fmt.Errorf("invalid authentication config: %v", err)
 		return
 	}
 
+	// mingregister-AccessControl(202005101751): // 构建权限验证相关配置
 	genericConfig.Authorization.Authorizer, genericConfig.RuleResolver, err = BuildAuthorizer(s, genericConfig.EgressSelector, versionedInformers)
 	if err != nil {
 		lastErr = fmt.Errorf("invalid authorization config: %v", err)
@@ -519,6 +522,7 @@ func buildGenericConfig(
 		genericConfig.DisabledPostStartHooks.Insert(rbacrest.PostStartHookName)
 	}
 
+	// mingregister-AccessControl(202005101752): admission配置?
 	admissionConfig := &kubeapiserveradmission.Config{
 		ExternalInformers:    versionedInformers,
 		LoopbackClientConfig: genericConfig.LoopbackClientConfig,
@@ -579,6 +583,7 @@ func BuildAuthenticator(s *options.ServerRunOptions, EgressSelector *egressselec
 			versionedInformer.Core().V1().Pods().Lister(),
 		)
 	}
+	// mingregister-AccessControl(202005101819): Bootstrap模式
 	authenticatorConfig.BootstrapTokenAuthenticator = bootstrap.NewTokenAuthenticator(
 		versionedInformer.Core().V1().Secrets().Lister().Secrets(v1.NamespaceSystem),
 	)
@@ -606,6 +611,7 @@ func BuildAuthorizer(s *options.ServerRunOptions, EgressSelector *egressselector
 		authorizationConfig.CustomDial = egressDialer
 	}
 
+	// mingregister-AccessControl(202005101805):learn-k8s-code\kubernetes-1.18.2\pkg\kubeapiserver\authorizer\config.go
 	return authorizationConfig.New()
 }
 

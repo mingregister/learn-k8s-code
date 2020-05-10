@@ -311,6 +311,7 @@ func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
 	return preparedGenericAPIServer{s}
 }
 
+// mingregister-配置服务路由(202005101705): kube-apiserver服务的正式启动
 // Run spawns the secure http server. It only returns if stopCh is closed
 // or the secure port cannot be listened on initially.
 func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
@@ -352,6 +353,7 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 	return nil
 }
 
+// mingregister-配置服务路由(202005101706): 预设些服务启动前的准备工作及服务shutdown之前的清理工作，然后启动服务。
 // NonBlockingRun spawns the secure http server. An error is
 // returned if the secure port cannot be listened on.
 func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
@@ -372,6 +374,7 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 	var stoppedCh <-chan struct{}
 	if s.SecureServingInfo != nil && s.Handler != nil {
 		var err error
+		// mingregister-配置服务路由(202005101708): 
 		stoppedCh, err = s.SecureServingInfo.Serve(s.Handler, s.ShutdownTimeout, internalStopCh)
 		if err != nil {
 			close(internalStopCh)
@@ -404,7 +407,7 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 
 // installAPIResources is a private method for installing the REST storage backing each api groupversionresource
 func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *APIGroupInfo, openAPIModels openapiproto.Models) error {
-	// mingregister(202005101404): 分别对对应的api组的不同版本进行处理.
+	// mingregister-配置服务路由(202005101404): 分别对对应的api组的不同版本进行处理.
 	for _, groupVersion := range apiGroupInfo.PrioritizedVersions {
 		if len(apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version]) == 0 {
 			klog.Warningf("Skipping API %v because it has no resources.", groupVersion)
@@ -418,6 +421,7 @@ func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *A
 		apiGroupVersion.OpenAPIModels = openAPIModels
 		apiGroupVersion.MaxRequestBodyBytes = s.maxRequestBodyBytes
 
+		// mingregister-配置服务路由(202005101644): 进入下一逻辑
 		if err := apiGroupVersion.InstallREST(s.Handler.GoRestfulContainer); err != nil {
 			return fmt.Errorf("unable to setup API %v: %v", apiGroupInfo, err)
 		}
@@ -466,7 +470,7 @@ func (s *GenericAPIServer) InstallAPIGroups(apiGroupInfos ...*APIGroupInfo) erro
 	}
 
 	for _, apiGroupInfo := range apiGroupInfos {
-		// mingregister(202005101400): 设置APIGroupPrefix即api根路径为/apis，随后转入下一步逻辑
+		// mingregister-配置服务路由(202005101400): 设置APIGroupPrefix即api根路径为/apis，随后转入下一步逻辑
 		// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiserver\pkg\server\config.go
 		if err := s.installAPIResources(APIGroupPrefix, apiGroupInfo, openAPIModels); err != nil {
 			return fmt.Errorf("unable to install api resources: %v", err)

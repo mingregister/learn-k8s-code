@@ -214,6 +214,7 @@ func RunServer(
 			listener = tls.NewListener(listener, server.TLSConfig)
 		}
 
+		// mingregister-配置服务路由(202005101713): kube-apiserver正式完全启动完成?
 		err := server.Serve(listener)
 
 		msg := fmt.Sprintf("Stopped listening on %s", ln.Addr().String())

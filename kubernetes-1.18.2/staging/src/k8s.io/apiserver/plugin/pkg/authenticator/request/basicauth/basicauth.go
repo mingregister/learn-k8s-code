@@ -35,6 +35,7 @@ func New(auth authenticator.Password) *Authenticator {
 
 var errInvalidAuth = errors.New("invalid username/password combination")
 
+// mingregister-AccessControl(202005101824): 函数都一样
 // AuthenticateRequest authenticates the request using the "Authorization: Basic" header in the request
 func (a *Authenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	username, password, found := req.BasicAuth()

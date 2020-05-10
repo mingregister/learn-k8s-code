@@ -96,6 +96,7 @@ func (config Config) New() (authenticator.Request, *spec.SecurityDefinitions, er
 	var tokenAuthenticators []authenticator.Token
 	securityDefinitions := spec.SecurityDefinitions{}
 
+	// mingregister-AccessControl(202005101822):  front proxy鉴权配置
 	// front-proxy, BasicAuth methods, local first, then remote
 	// Add the front proxy authenticator if requested
 	if config.RequestHeaderConfig != nil {
@@ -109,7 +110,7 @@ func (config Config) New() (authenticator.Request, *spec.SecurityDefinitions, er
 		authenticators = append(authenticators, authenticator.WrapAudienceAgnosticRequest(config.APIAudiences, requestHeaderAuthenticator))
 	}
 
-	// basic auth
+	// basic auth mingregister-AccessControl(202005101822)
 	if len(config.BasicAuthFile) > 0 {
 		basicAuth, err := newAuthenticatorFromBasicAuthFile(config.BasicAuthFile)
 		if err != nil {
@@ -125,13 +126,13 @@ func (config Config) New() (authenticator.Request, *spec.SecurityDefinitions, er
 		}
 	}
 
-	// X509 methods
+	// X509 methods mingregister-AccessControl(202005101822)
 	if config.ClientCAContentProvider != nil {
 		certAuth := x509.NewDynamic(config.ClientCAContentProvider.VerifyOptions, x509.CommonNameUserConversion)
 		authenticators = append(authenticators, certAuth)
 	}
 
-	// Bearer token methods, local first, then remote
+	// Bearer token methods, local first, then remote mingregister-AccessControl(202005101822)
 	if len(config.TokenAuthFile) > 0 {
 		tokenAuth, err := newAuthenticatorFromTokenFile(config.TokenAuthFile)
 		if err != nil {

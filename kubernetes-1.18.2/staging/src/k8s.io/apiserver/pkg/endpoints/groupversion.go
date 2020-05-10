@@ -95,6 +95,7 @@ type APIGroupVersion struct {
 // It is expected that the provided path root prefix will serve all operations. Root MUST NOT end
 // in a slash.
 func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
+	// mingregister-配置服务路由(202005101649): 这里将api的prefix组装成如/apis/apiextensions.k8s.io/v1beta1形式
 	prefix := path.Join(g.Root, g.GroupVersion.Group, g.GroupVersion.Version)
 	installer := &APIInstaller{
 		group:             g,
@@ -102,9 +103,11 @@ func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
 		minRequestTimeout: g.MinRequestTimeout,
 	}
 
+	// mingregister-配置服务路由(202005101650): Install()进入下一层逻辑
 	apiResources, ws, registrationErrors := installer.Install()
 	versionDiscoveryHandler := discovery.NewAPIVersionHandler(g.Serializer, g.GroupVersion, staticLister{apiResources})
 	versionDiscoveryHandler.AddToWebService(ws)
+	// mingregister-配置服务路由(202005101651): 将对应路径(/apis/apiextensions.k8s.io/v1beta1/)下的WebService注册到Container中
 	container.Add(ws)
 	return utilerrors.NewAggregate(registrationErrors)
 }

@@ -121,6 +121,7 @@ func GetResourceWithOptions(r rest.GetterWithOptions, scope *RequestScope, isSub
 			if trace != nil {
 				trace.Step("About to Get from storage")
 			}
+			// mingregister- InteractiveWithEtcd(202005101835): 逻辑实现为对应的rest.GetterWithOptions的相应操作。
 			return r.Get(ctx, name, opts)
 		})
 }

@@ -18,6 +18,8 @@ package modes
 
 import "k8s.io/apimachinery/pkg/util/sets"
 
+
+// mingregister-AccessControl(202005101806): 现有的访问权限控制模式
 const (
 	// ModeAlwaysAllow is the mode to set all requests as authorized
 	ModeAlwaysAllow string = "AlwaysAllow"

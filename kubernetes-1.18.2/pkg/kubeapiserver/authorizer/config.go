@@ -75,6 +75,7 @@ func (config Config) New() (authorizer.Authorizer, authorizer.RuleResolver, erro
 	for _, authorizationMode := range config.AuthorizationModes {
 		// Keep cases in sync with constant list in k8s.io/kubernetes/pkg/kubeapiserver/authorizer/modes/modes.go.
 		switch authorizationMode {
+		// mingregister-AccessControl(202005101806): Node模式
 		case modes.ModeNode:
 			graph := node.NewGraph()
 			node.AddGraphEventHandlers(
@@ -87,14 +88,17 @@ func (config Config) New() (authorizer.Authorizer, authorizer.RuleResolver, erro
 			nodeAuthorizer := node.NewAuthorizer(graph, nodeidentifier.NewDefaultNodeIdentifier(), bootstrappolicy.NodeRules())
 			authorizers = append(authorizers, nodeAuthorizer)
 
+		// mingregister-AccessControl(202005101806): AlwaysAllow模式
 		case modes.ModeAlwaysAllow:
 			alwaysAllowAuthorizer := authorizerfactory.NewAlwaysAllowAuthorizer()
 			authorizers = append(authorizers, alwaysAllowAuthorizer)
 			ruleResolvers = append(ruleResolvers, alwaysAllowAuthorizer)
+		// mingregister-AccessControl(202005101806): AlwayDeny模式
 		case modes.ModeAlwaysDeny:
 			alwaysDenyAuthorizer := authorizerfactory.NewAlwaysDenyAuthorizer()
 			authorizers = append(authorizers, alwaysDenyAuthorizer)
 			ruleResolvers = append(ruleResolvers, alwaysDenyAuthorizer)
+		// mingregister-AccessControl(202005101806): ABAC模式
 		case modes.ModeABAC:
 			abacAuthorizer, err := abac.NewFromFile(config.PolicyFile)
 			if err != nil {
@@ -102,6 +106,7 @@ func (config Config) New() (authorizer.Authorizer, authorizer.RuleResolver, erro
 			}
 			authorizers = append(authorizers, abacAuthorizer)
 			ruleResolvers = append(ruleResolvers, abacAuthorizer)
+		// mingregister-AccessControl(202005101806): Webhook
 		case modes.ModeWebhook:
 			webhookAuthorizer, err := webhook.New(config.WebhookConfigFile,
 				config.WebhookVersion,
@@ -113,6 +118,7 @@ func (config Config) New() (authorizer.Authorizer, authorizer.RuleResolver, erro
 			}
 			authorizers = append(authorizers, webhookAuthorizer)
 			ruleResolvers = append(ruleResolvers, webhookAuthorizer)
+		// mingregister-AccessControl(202005101806): RBAC模式
 		case modes.ModeRBAC:
 			rbacAuthorizer := rbac.New(
 				&rbac.RoleGetter{Lister: config.VersionedInformerFactory.Rbac().V1().Roles().Lister()},

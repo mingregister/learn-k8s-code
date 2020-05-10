@@ -99,7 +99,7 @@ func createAPIExtensionsConfig(
 }
 
 func createAPIExtensionsServer(apiextensionsConfig *apiextensionsapiserver.Config, delegateAPIServer genericapiserver.DelegationTarget) (*apiextensionsapiserver.CustomResourceDefinitions, error) {
-	// mingregister(202005101339): Complete()完善apiextensionsConfig的配置信息，然后到new的逻辑里面组装customresourcedefinitions对应的api组信息apiGroupInfo。
+	// mingregister-配置服务路由(202005101339): Complete()完善apiextensionsConfig的配置信息，然后到new的逻辑里面组装customresourcedefinitions对应的api组信息apiGroupInfo。
 	// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiextensions-apiserver\pkg\apiserver\apiserver.go
 	return apiextensionsConfig.Complete().New(delegateAPIServer)
 }

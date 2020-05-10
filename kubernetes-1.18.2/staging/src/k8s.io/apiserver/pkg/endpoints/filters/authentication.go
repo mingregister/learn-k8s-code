@@ -46,6 +46,8 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 		if len(apiAuds) > 0 {
 			req = req.WithContext(authenticator.WithAudiences(req.Context(), apiAuds))
 		}
+		// mingregister-AccessControl(202005101815): 主要逻辑在这里.  
+		// AccessControl的逻辑都是差不多的，函数名都是WithAuthxxxx, 主要逻辑都是下面的这行。
 		resp, ok, err := auth.AuthenticateRequest(req)
 		defer recordAuthMetrics(resp, ok, err, apiAuds, authenticationStart)
 		if err != nil || !ok {

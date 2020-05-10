@@ -106,6 +106,7 @@ func NewDynamic(verifyOptionsFn VerifyOptionFunc, user UserConversion) *Authenti
 	return &Authenticator{verifyOptionsFn, user}
 }
 
+// mingregister-AccessControl(202005101824): 函数都一样
 // AuthenticateRequest authenticates the request using presented client certificates
 func (a *Authenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	if req.TLS == nil || len(req.TLS.PeerCertificates) == 0 {
