@@ -174,7 +174,7 @@ func CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan
 	if err != nil {
 		return nil, err
 	}
-
+	// mingregister-AccessControl(202005101744): hera
 	kubeAPIServerConfig, insecureServingInfo, serviceResolver, pluginInitializer, err := CreateKubeAPIServerConfig(completedOptions, nodeTunneler, proxyTransport)
 	if err != nil {
 		return nil, err
@@ -512,7 +512,7 @@ func buildGenericConfig(
 		return
 	}
 
-	// mingregister-AccessControl(202005101751): // 构建权限验证相关配置
+	// mingregister-AccessControl(202005101751): 构建权限验证相关配置
 	genericConfig.Authorization.Authorizer, genericConfig.RuleResolver, err = BuildAuthorizer(s, genericConfig.EgressSelector, versionedInformers)
 	if err != nil {
 		lastErr = fmt.Errorf("invalid authorization config: %v", err)
