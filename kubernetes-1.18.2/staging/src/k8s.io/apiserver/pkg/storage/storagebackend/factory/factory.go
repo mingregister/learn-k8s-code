@@ -26,12 +26,14 @@ import (
 // DestroyFunc is to destroy any resources used by the storage returned in Create() together.
 type DestroyFunc func()
 
+// mingregister-InteractiveWithEtcd(202005102322): 根据etcd的版本来创建对应的后端交互结构体，1.17版本仅支持etcd v3版本
 // Create creates a storage backend based on given config.
 func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
 	switch c.Type {
 	case "etcd2":
 		return nil, nil, fmt.Errorf("%v is no longer a supported storage backend", c.Type)
 	case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
+		// mingregister-InteractiveWithEtcd(202005102322): hera
 		return newETCD3Storage(c)
 	default:
 		return nil, nil, fmt.Errorf("unknown storage type: %s", c.Type)

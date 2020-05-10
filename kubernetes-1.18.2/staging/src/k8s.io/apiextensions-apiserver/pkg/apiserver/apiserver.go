@@ -138,12 +138,13 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	}
 
 	apiResourceConfig := c.GenericConfig.MergedResourceConfig
-	// mingregister-配置服务路由(202005101347): 将这组api的GroupName设置为apiextensions.k8s.io 
+	// mingregister-配置服务路由(202005101347): 将这组api的GroupName设置为apiextensions.k8s.io
 	// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiextensions-apiserver\pkg\apis\apiextensions\register.go
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(apiextensions.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 	// mingregister-配置服务路由(202005101348): 根据配置情况，装填对应资源的CRUD后端交互结构体
 	if apiResourceConfig.VersionEnabled(v1beta1.SchemeGroupVersion) {
 		storage := map[string]rest.Storage{}
+		// mingregister-InteractiveWithEtcd(202005102322): 以customresourcedefinitions这种资源对应的操作为例。NewREST来构造对应的后端交互结构体
 		// customresourcedefinitions
 		customResourceDefintionStorage := customresourcedefinition.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)
 		storage["customresourcedefinitions"] = customResourceDefintionStorage

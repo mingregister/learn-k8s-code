@@ -61,6 +61,7 @@ func (d authenticatedDataString) AuthenticatedData() []byte {
 
 var _ value.Context = authenticatedDataString("")
 
+// mingregister-InteractiveWithEtcd(202005102322): hera
 type store struct {
 	client *clientv3.Client
 	// getOpts contains additional options that should be passed
@@ -85,9 +86,11 @@ type objState struct {
 
 // New returns an etcd3 implementation of storage.Interface.
 func New(c *clientv3.Client, codec runtime.Codec, prefix string, transformer value.Transformer, pagingEnabled bool) storage.Interface {
+	// mingregister-InteractiveWithEtcd(202005102322): hera
 	return newStore(c, pagingEnabled, codec, prefix, transformer)
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): hera
 func newStore(c *clientv3.Client, pagingEnabled bool, codec runtime.Codec, prefix string, transformer value.Transformer) *store {
 	versioner := APIObjectVersioner{}
 	result := &store{
@@ -111,6 +114,7 @@ func (s *store) Versioner() storage.Versioner {
 	return s.versioner
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): hera, 实现learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiserver\pkg\storage\interfaces.go的Interface接口方法
 // Get implements storage.Interface.Get.
 func (s *store) Get(ctx context.Context, key string, resourceVersion string, out runtime.Object, ignoreNotFound bool) error {
 	key = path.Join(s.pathPrefix, key)

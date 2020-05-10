@@ -153,6 +153,7 @@ func (p *Preconditions) Check(key string, obj runtime.Object) error {
 	return nil
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): hera, 操作etcd的需要实现的接口?
 // Interface offers a common interface for object marshaling/unmarshaling operations and
 // hides all the storage-related operations behind it.
 type Interface interface {

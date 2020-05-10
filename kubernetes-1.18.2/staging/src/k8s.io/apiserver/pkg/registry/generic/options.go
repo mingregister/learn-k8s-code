@@ -41,6 +41,8 @@ func (opts RESTOptions) GetRESTOptions(schema.GroupResource) (RESTOptions, error
 	return opts, nil
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): CRDRESTOptionsGetter是crd对应实现后端交互接口的结构体。
+// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiextensions-apiserver\pkg\apiserver\customresource_handler.go
 type RESTOptionsGetter interface {
 	GetRESTOptions(resource schema.GroupResource) (RESTOptions, error)
 }

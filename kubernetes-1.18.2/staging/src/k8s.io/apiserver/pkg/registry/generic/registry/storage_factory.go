@@ -42,7 +42,7 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 		getAttrsFunc storage.AttrFunc,
 		triggerFuncs storage.IndexerFuncs,
 		indexers *cache.Indexers) (storage.Interface, factory.DestroyFunc, error) {
-
+		// mingregister-InteractiveWithEtcd(202005102322): 构造和后端etcd交互的结构体Storage
 		s, d, err := generic.NewRawStorage(storageConfig)
 		if err != nil {
 			return s, d, err

@@ -206,6 +206,7 @@ func startCompactorOnce(c storagebackend.TransportConfig, interval time.Duration
 	}, nil
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): hera
 func newETCD3Storage(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
 	stopCompactor, err := startCompactorOnce(c.Transport, c.CompactionInterval)
 	if err != nil {

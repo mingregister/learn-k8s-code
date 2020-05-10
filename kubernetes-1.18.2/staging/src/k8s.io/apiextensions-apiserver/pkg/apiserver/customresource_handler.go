@@ -1008,6 +1008,8 @@ type CRDRESTOptionsGetter struct {
 	CountMetricPollPeriod   time.Duration
 }
 
+// mingregister-InteractiveWithEtcd(202005102322): CRDRESTOptionsGetter是crd对应实现后端交互接口的结构体。
+// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiserver\pkg\registry\generic\options.go
 func (t CRDRESTOptionsGetter) GetRESTOptions(resource schema.GroupResource) (generic.RESTOptions, error) {
 	ret := generic.RESTOptions{
 		StorageConfig:           &t.StorageConfig,
@@ -1018,6 +1020,7 @@ func (t CRDRESTOptionsGetter) GetRESTOptions(resource schema.GroupResource) (gen
 		CountMetricPollPeriod:   t.CountMetricPollPeriod,
 	}
 	if t.EnableWatchCache {
+		// mingregister-InteractiveWithEtcd(202005102322): hera
 		ret.Decorator = genericregistry.StorageWithCacher(t.DefaultWatchCacheSize)
 	}
 	return ret, nil

@@ -41,6 +41,7 @@ type REST struct {
 func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) *REST {
 	strategy := NewStrategy(scheme)
 
+	// mingregister-InteractiveWithEtcd(202005102322): 相应数据结构在前面已经提到，这里不再赘述???
 	store := &genericregistry.Store{
 		NewFunc:                  func() runtime.Object { return &apiextensions.CustomResourceDefinition{} },
 		NewListFunc:              func() runtime.Object { return &apiextensions.CustomResourceDefinitionList{} },
@@ -51,6 +52,8 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) *REST
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
 	}
+
+	// mingregister-InteractiveWithEtcd(202005102322): 完善结构体的action操作
 	options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
 	if err := store.CompleteWithOptions(options); err != nil {
 		panic(err) // TODO: Propagate error up
