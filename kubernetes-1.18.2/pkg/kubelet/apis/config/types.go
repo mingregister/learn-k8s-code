@@ -70,6 +70,7 @@ const (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// mingregister-kubelet配置(202005252212): /etc/kubernetes/kubelet-config.yaml的配置参数出自这里.
 // KubeletConfiguration contains the configuration for the Kubelet
 type KubeletConfiguration struct {
 	metav1.TypeMeta
