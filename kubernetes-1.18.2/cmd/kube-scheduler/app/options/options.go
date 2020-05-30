@@ -64,6 +64,8 @@ type Options struct {
 	Authorization           *apiserveroptions.DelegatingAuthorizationOptions
 	Deprecated              *DeprecatedOptions
 
+	// mingregister-options(202005310053): 通过Flags把ConfigFile与--config对应起来。
+	// fs.StringVar(&o.ConfigFile, "config", o.ConfigFile, "The path to the configuration file. Flags override values in this file.")
 	// ConfigFile is the location of the scheduler server's configuration file.
 	ConfigFile string
 
@@ -149,6 +151,7 @@ func newDefaultComponentConfig() (*kubeschedulerconfig.KubeSchedulerConfiguratio
 
 // Flags returns flags for a specific scheduler by section name
 func (o *Options) Flags() (nfs cliflag.NamedFlagSets) {
+	// mingregister-options(202005310102): 一个FlagSet代表一组配置。通过kube-scheduler --help的输出可以观察到。
 	fs := nfs.FlagSet("misc")
 	fs.StringVar(&o.ConfigFile, "config", o.ConfigFile, "The path to the configuration file. Flags override values in this file.")
 	fs.StringVar(&o.WriteConfigTo, "write-config-to", o.WriteConfigTo, "If set, write the configuration values to this file and exit.")
@@ -249,6 +252,7 @@ func (o *Options) Config() (*schedulerappconfig.Config, error) {
 		}
 	}
 
+	// mingregister-options(202005310025): c是一个结构体： Config has all the context to run a Scheduler
 	c := &schedulerappconfig.Config{}
 	if err := o.ApplyTo(c); err != nil {
 		return nil, err

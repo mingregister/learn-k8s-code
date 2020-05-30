@@ -27,7 +27,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"k8s.io/api/core/v1"
 	eventsv1beta1 "k8s.io/api/events/v1beta1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -139,6 +138,7 @@ func runCommand(cmd *cobra.Command, args []string, opts *options.Options, regist
 		return nil
 	}
 
+	// mingregister-options(202005310034): func (o *Options) Config() (*schedulerappconfig.Config, error) {}
 	c, err := opts.Config()
 	if err != nil {
 		return err
