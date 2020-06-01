@@ -89,9 +89,11 @@ type desiredStateOfWorldPopulator struct {
 }
 
 func (dswp *desiredStateOfWorldPopulator) Run(stopCh <-chan struct{}) {
+	// mingregister-attachdetachController(202006020042): Until loops until stop channel is closed, running dswp.populatorLoopFunc() every period.
 	wait.Until(dswp.populatorLoopFunc(), dswp.loopSleepDuration, stopCh)
 }
 
+// mingregister-attachdetachController(202006020043): desiredStateOfWorldPopulator 中也会周期性地去找出需要被 add 的 pod，此时也会把相应的 volume 和 pod 填充到nodesManaged。
 func (dswp *desiredStateOfWorldPopulator) populatorLoopFunc() func() {
 	return func() {
 		dswp.findAndRemoveDeletedPods()
@@ -169,6 +171,7 @@ func (dswp *desiredStateOfWorldPopulator) findAndAddActivePods() {
 			// Do not add volumes for terminated pods
 			continue
 		}
+		// mingregister-attachdetachController(202006020043): desiredStateOfWorldPopulator 中也会周期性地去找出需要被 add 的 pod，此时也会把相应的 volume 和 pod 填充到nodesManaged。
 		util.ProcessPodVolumes(pod, true,
 			dswp.desiredStateOfWorld, dswp.volumePluginMgr, dswp.pvcLister, dswp.pvLister, dswp.csiMigratedPluginManager, dswp.intreeToCSITranslator)
 

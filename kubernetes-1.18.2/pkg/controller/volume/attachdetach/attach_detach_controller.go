@@ -206,6 +206,7 @@ func NewAttachDetachController(
 	}
 
 	nodeInformer.Informer().AddEventHandler(kcache.ResourceEventHandlerFuncs{
+		// mingregister-attachdetachController(202006012331): ad controller 的nodeInformer watch 到 node 有更新也会把 node 填充到nodesManaged。  感觉不太像，没有看到nodeManaged
 		AddFunc:    adc.nodeAdd,
 		UpdateFunc: adc.nodeUpdate,
 		DeleteFunc: adc.nodeDelete,
@@ -380,6 +381,11 @@ func (adc *attachDetachController) populateActualStateOfWorld() error {
 		return err
 	}
 
+	/* mingregister-attachdetachController(202006012235): 如何填充数据？
+	1、在启动 ad controller 时，会 populate asw，此时会 list 集群内所有 node 对象，
+	    然后用这些 node 对象的node.Status.VolumesAttached 去填充attachedVolumes。
+	2、之后只要有需要 attach 的 volume 被成功 attach 了，
+	    就会调用MarkVolumeAsAttached（GenerateAttachVolumeFunc 中）来填充到attachedVolumes中。*/
 	for _, node := range nodes {
 		nodeName := types.NodeName(node.Name)
 		for _, attachedVolume := range node.Status.VolumesAttached {
@@ -395,6 +401,7 @@ func (adc *attachDetachController) populateActualStateOfWorld() error {
 				continue
 			}
 			adc.processVolumesInUse(nodeName, node.Status.VolumesInUse)
+			// mingregister-attachdetachController(202006012327): 在启动 ad controller 时，会 populate asw，list 集群内所有 node 对象，然后把由 ad controller 管理的 node 填充到nodesManaged。
 			adc.addNodeToDswp(node, types.NodeName(node.Name))
 		}
 	}
@@ -485,6 +492,7 @@ func (adc *attachDetachController) populateDesiredStateOfWorld() error {
 	return nil
 }
 
+// mingregister-attachdetachController(202006020031): 另外在 populate dsw 和podInformer watch 到 pod 有变化（add, update）时，往nodesManaged 中填充 volume 和 pod 的信息。
 func (adc *attachDetachController) podAdd(obj interface{}) {
 	pod, ok := obj.(*v1.Pod)
 	if pod == nil || !ok {
@@ -495,11 +503,16 @@ func (adc *attachDetachController) podAdd(obj interface{}) {
 		return
 	}
 
+	// mingregister-attachdetachController(202006020028):
+	//      DetermineVolumeAction returns true if volume and pod needs to be added to dswp
+	//      and it returns false if volume and pod needs to be removed from dswp
 	volumeActionFlag := util.DetermineVolumeAction(
 		pod,
 		adc.desiredStateOfWorld,
 		true /* default volume action */)
 
+	// mingregister-attachdetachController(202006020029): ProcessPodVolumes processes the volumes in the given pod
+	//      and adds them to the desired state of the world if addVolumes is true, otherwise it removes them.
 	util.ProcessPodVolumes(pod, volumeActionFlag, /* addVolumes */
 		adc.desiredStateOfWorld, &adc.volumePluginMgr, adc.pvcLister, adc.pvLister, adc.csiMigratedPluginManager, adc.intreeToCSITranslator)
 }

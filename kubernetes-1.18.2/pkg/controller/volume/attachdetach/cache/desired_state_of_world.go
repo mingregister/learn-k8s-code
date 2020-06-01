@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"sync"
 
-	"k8s.io/api/core/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/volume"
 	"k8s.io/kubernetes/pkg/volume/util"
@@ -138,6 +137,7 @@ func NewDesiredStateOfWorld(volumePluginMgr *volume.VolumePluginMgr) DesiredStat
 }
 
 type desiredStateOfWorld struct {
+	// mingregister-attachdetachController(202006012316): 包含被 ad controller 管理的 nodes，以及期望 attach 到这些 node 上的 volumes。
 	// nodesManaged is a map containing the set of nodes managed by the attach/
 	// detach controller. The key in this map is the name of the node and the
 	// value is a node object containing more information about the node.
@@ -199,6 +199,7 @@ func (dsw *desiredStateOfWorld) AddNode(nodeName k8stypes.NodeName, keepTerminat
 	dsw.Lock()
 	defer dsw.Unlock()
 
+	// mingregister-attachdetachController(202006012324): 在启动 ad controller 时，会 populate asw，list 集群内所有 node 对象，然后把由 ad controller 管理的 node 填充到nodesManaged。
 	if _, nodeExists := dsw.nodesManaged[nodeName]; !nodeExists {
 		dsw.nodesManaged[nodeName] = nodeManaged{
 			nodeName:                 nodeName,

@@ -463,6 +463,8 @@ func (og *operationGenerator) GenerateDetachVolumeFunc(
 			err = volumeDetacher.Detach(volumeName, volumeToDetach.NodeName)
 		}
 		if err != nil {
+			/* mingregister-attachdetachController(202006012300): 如何填充数据？
+			detach volume 失败后，将 volume add back 到nodesToUpdateStatusFor */
 			// On failure, add volume back to ReportAsAttached list
 			actualStateOfWorld.AddVolumeToReportAsAttached(
 				volumeToDetach.VolumeName, volumeToDetach.NodeName)
@@ -471,6 +473,9 @@ func (og *operationGenerator) GenerateDetachVolumeFunc(
 
 		klog.Infof(volumeToDetach.GenerateMsgDetailed("DetachVolume.Detach succeeded", ""))
 
+		/* mingregister-attachdetachController(202006012244): 如何删除数据？
+		只有在 volume 被 detach 成功后，才会把相关的 volume 从attachedVolumes中删掉。
+		（GenerateDetachVolumeFunc 中调用MarkVolumeDetached)。*/
 		// Update actual state of world
 		actualStateOfWorld.MarkVolumeAsDetached(
 			volumeToDetach.VolumeName, volumeToDetach.NodeName)

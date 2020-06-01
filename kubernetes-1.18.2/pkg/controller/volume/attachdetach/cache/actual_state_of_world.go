@@ -28,6 +28,7 @@ import (
 
 	"k8s.io/klog"
 
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/volume"
 	"k8s.io/kubernetes/pkg/volume/util"
@@ -166,12 +167,14 @@ type actualStateOfWorld struct {
 	// controller believes to be successfully attached to the nodes it is
 	// managing. The key in this map is the name of the volume and the value is
 	// an object containing more information about the attached volume.
+	// mingregister-attachdetachController(202006012224): 包含了那些 ad controller 认为被成功 attach 到 nodes 上的 volumes。  内容是：node.Status.VolumesAttached?
 	attachedVolumes map[v1.UniqueVolumeName]attachedVolume
 
 	// nodesToUpdateStatusFor is a map containing the set of nodes for which to
 	// update the VolumesAttached Status field. The key in this map is the name
 	// of the node and the value is an object containing more information about
 	// the node (including the list of volumes to report attached).
+	// mingregister-attachdetachController(202006012225): 包含要更新node.Status.VolumesAttached 的 nodes
 	nodesToUpdateStatusFor map[types.NodeName]nodeToUpdateStatusFor
 
 	// volumePluginMgr is the volume plugin manager used to create volume
@@ -427,6 +430,8 @@ func (asw *actualStateOfWorld) getNodeAndVolume(
 		nodeName)
 }
 
+/* mingregister-attachdetachController(202006012312): 如何删除数据？
+在 detach volume 之前会先调用RemoveVolumeFromReportAsAttached 从nodesToUpdateStatusFor中先删除该 volume 相关信息。*/
 // Remove the volumeName from the node's volumesToReportAsAttached list
 // This is an internal function and caller should acquire and release the lock
 func (asw *actualStateOfWorld) removeVolumeFromReportAsAttached(
