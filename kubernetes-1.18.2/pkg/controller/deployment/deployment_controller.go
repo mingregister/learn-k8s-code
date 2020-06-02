@@ -63,6 +63,7 @@ const (
 // controllerKind contains the schema.GroupVersionKind for this controller type.
 var controllerKind = apps.SchemeGroupVersion.WithKind("Deployment")
 
+// mingregister-HowToBuildController(202006021331): 1. 创建一个controller的结构体。
 // DeploymentController is responsible for synchronizing Deployment objects stored
 // in the system with actual running replica sets and pods.
 type DeploymentController struct {
@@ -97,6 +98,7 @@ type DeploymentController struct {
 	queue workqueue.RateLimitingInterface
 }
 
+// mingregister-HowToBuildController(202006021331): 2. Constructing a WorkQueue and a SharedInformer
 // NewDeploymentController creates a new DeploymentController.
 func NewDeploymentController(dInformer appsinformers.DeploymentInformer, rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, client clientset.Interface) (*DeploymentController, error) {
 	eventBroadcaster := record.NewBroadcaster()
@@ -108,6 +110,7 @@ func NewDeploymentController(dInformer appsinformers.DeploymentInformer, rsInfor
 			return nil, err
 		}
 	}
+	// mingregister-HowToBuildController(202006021331): 2.1 这里的informer是调用了*已经写好的* 
 	dc := &DeploymentController{
 		client:        client,
 		eventRecorder: eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "deployment-controller"}),
@@ -118,6 +121,7 @@ func NewDeploymentController(dInformer appsinformers.DeploymentInformer, rsInfor
 		Recorder:   dc.eventRecorder,
 	}
 
+	// mingregister-HowToBuildController(202006021331): 2.2 AddEventHandler
 	dInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    dc.addDeployment,
 		UpdateFunc: dc.updateDeployment,
@@ -129,6 +133,7 @@ func NewDeploymentController(dInformer appsinformers.DeploymentInformer, rsInfor
 		UpdateFunc: dc.updateReplicaSet,
 		DeleteFunc: dc.deleteReplicaSet,
 	})
+	/* mingregister-HowToBuildController(202006021331): 为什么需要把podInformer也加进来呢? 不是应该只加rsInformer就好了，podInformer交由rsInformer来管理.*/
 	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: dc.deletePod,
 	})
@@ -145,19 +150,26 @@ func NewDeploymentController(dInformer appsinformers.DeploymentInformer, rsInfor
 	return dc, nil
 }
 
+/* mingregister-HowToBuildController(202006021331): 3. Start the controller.
+StopCh channel is used to send interrupt signal to stop it. */
 // Run begins watching and syncing.
 func (dc *DeploymentController) Run(workers int, stopCh <-chan struct{}) {
+	// mingregister-HowToBuildController(202006021331): don't let panics crash the process
 	defer utilruntime.HandleCrash()
+	// mingregister-HowToBuildController(202006021331): make sure the work queue is shutdown which will trigger workers to end
 	defer dc.queue.ShutDown()
 
 	klog.Infof("Starting deployment controller")
 	defer klog.Infof("Shutting down deployment controller")
 
+	// mingregister-HowToBuildController(202006021331): wait for the caches to synchronize before starting the worker
 	if !cache.WaitForNamedCacheSync("deployment", stopCh, dc.dListerSynced, dc.rsListerSynced, dc.podListerSynced) {
 		return
 	}
 
 	for i := 0; i < workers; i++ {
+		// mingregister-HowToBuildController(202006021331): dc.worker will loop until "something bad" happens.  The .Until will
+		// mingregister-HowToBuildController(202006021331): then rekick the worker after one second
 		go wait.Until(dc.worker, time.Second, stopCh)
 	}
 
@@ -458,17 +470,24 @@ func (dc *DeploymentController) resolveControllerRef(namespace string, controlle
 // worker runs a worker thread that just dequeues items, processes them, and marks them done.
 // It enforces that the syncHandler is never invoked concurrently with the same key.
 func (dc *DeploymentController) worker() {
+	// mingregister-HowToBuildController(202006021331): processNextWorkItem will automatically wait until there's work available
 	for dc.processNextWorkItem() {
+		// mingregister-HowToBuildController(202006021331): continue looping
 	}
 }
 
+/* mingregister-HowToBuildController(202006021331): processNextWorkItem deals with one key off the queue.  It returns false
+when it's time to quit. */ 
 func (dc *DeploymentController) processNextWorkItem() bool {
+	// mingregister-HowToBuildController(202006021331): pull the next work item from queue.  It should be a key we use to lookup something in a cache
 	key, quit := dc.queue.Get()
 	if quit {
 		return false
 	}
+	// mingregister-HowToBuildController(202006021331): you always have to indicate(说明) to the queue that you've completed a piece of work
 	defer dc.queue.Done(key)
 
+	// mingregister-HowToBuildController(202006021331): do your work on the key.    文档/旧版本用的是：processItem
 	err := dc.syncHandler(key.(string))
 	dc.handleErr(err, key)
 
@@ -477,16 +496,19 @@ func (dc *DeploymentController) processNextWorkItem() bool {
 
 func (dc *DeploymentController) handleErr(err error, key interface{}) {
 	if err == nil || errors.HasStatusCause(err, v1.NamespaceTerminatingCause) {
+		// mingregister-HowToBuildController(202006021331): No error, tell the queue to stop tracking history
 		dc.queue.Forget(key)
 		return
 	}
 
 	if dc.queue.NumRequeues(key) < maxRetries {
 		klog.V(2).Infof("Error syncing deployment %v: %v", key, err)
+		// mingregister-HowToBuildController(202006021331): requeue the item to work on later
 		dc.queue.AddRateLimited(key)
 		return
 	}
 
+	// mingregister-HowToBuildController(202006021331): err != nil and too many retries
 	utilruntime.HandleError(err)
 	klog.V(2).Infof("Dropping deployment %q out of the queue: %v", key, err)
 	dc.queue.Forget(key)
@@ -558,6 +580,7 @@ func (dc *DeploymentController) getPodMapForDeployment(d *apps.Deployment, rsLis
 	return podMap, nil
 }
 
+// mingregister-HowToBuildController(202006021331): 最将会赋值为：dc.syncHandler = dc.syncDeployment, 估计其它contronller也会有差不多形式的synHandler
 // syncDeployment will sync the deployment with the given key.
 // This function is not meant to be invoked concurrently with the same key.
 func (dc *DeploymentController) syncDeployment(key string) error {
@@ -567,10 +590,12 @@ func (dc *DeploymentController) syncDeployment(key string) error {
 		klog.V(4).Infof("Finished syncing deployment %q (%v)", key, time.Since(startTime))
 	}()
 
+	// mingregister-HowToBuildController(202006021331): namespace：就是namespace咯，name就是deployment的名称。
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
+	// mingregister-HowToBuildController(202006021331):  开始处理deployment的逻辑。
 	deployment, err := dc.dLister.Deployments(namespace).Get(name)
 	if errors.IsNotFound(err) {
 		klog.V(2).Infof("Deployment %v has been deleted", key)
@@ -586,6 +611,7 @@ func (dc *DeploymentController) syncDeployment(key string) error {
 
 	everything := metav1.LabelSelector{}
 	if reflect.DeepEqual(d.Spec.Selector, &everything) {
+		// mingregister-HowToBuildController(202006021331): 通过eventRecorder记录事件。
 		dc.eventRecorder.Eventf(d, v1.EventTypeWarning, "SelectingAll", "This deployment is selecting all pods. A non-empty selector is required.")
 		if d.Status.ObservedGeneration < d.Generation {
 			d.Status.ObservedGeneration = d.Generation

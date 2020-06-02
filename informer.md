@@ -4,15 +4,78 @@ https://engineering.bitnami.com/articles/kubewatch-an-example-of-kubernetes-cust
 
 There are two main components of a controller: **informer/SharedInformer and Workqueue.** Informer/SharedInformer watches for changes on the current state of Kubernetes objects and sends events to Workqueue where events are then popped up by worker(s) to process.
 
+# HOW TO WRITE A CONTROLLER
+The following are the typical steps you must follow when writing a controller (Kubewatch example):
+* Construct a WorkQueue and a SharedInformer
+* Start the controller
+* Connect the controller to Slack  // 在1.18.2这个已经看不到了。
+
+### 构建一个controller的结构体
+learn-k8s-code/kubernetes-1.18.2/pkg/controller/volume/attachdetach/attach_detach_controller.go:251
+``` go
+type DeploymentController struct {
+	// rsControl is used for adopting/releasing replica sets.
+	rsControl     controller.RSControlInterface
+	client        clientset.Interface
+	eventRecorder record.EventRecorder
+
+       // xxLister及xxListerSynced可以有很多种。你要监听那些，就自己加上来。
+	xxLister appslisters.DeploymentLister
+       xxListerSynced cache.InformerSynced
+
+	// Deployments that need to be synced
+	queue workqueue.RateLimitingInterface
+
+       // To allow injection of syncDeployment for testing.
+	syncHandler func(dKey string) error
+	// used for unit testing
+	enqueueDeployment func(deployment *apps.Deployment)
 
 
-# PodInformer
+}
+```
+
+
+### PodInformer
+https://gowalker.org/k8s.io/client-go/tools/cache#SharedInformer
+
 PodInformer provides access to a shared informer and lister for Pods.
 ``` go
 // 注意，这里是interface哦。
 type PodInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() v1.PodLister
+}
+
+type podInformer struct {
+	factory          internalinterfaces.SharedInformerFactory
+	tweakListOptions internalinterfaces.TweakListOptionsFunc
+	namespace        string
+}
+
+// NewFilteredPodInformer constructs a new informer for Pod type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewFilteredPodInformer(client kubernetes.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+	return cache.NewSharedIndexInformer(
+		&cache.ListWatch{
+			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.CoreV1().Pods(namespace).List(context.TODO(), options)
+			},
+			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.CoreV1().Pods(namespace).Watch(context.TODO(), options)
+			},
+		},
+		&corev1.Pod{},
+		resyncPeriod,
+		indexers,
+	)
 }
 ```
 
