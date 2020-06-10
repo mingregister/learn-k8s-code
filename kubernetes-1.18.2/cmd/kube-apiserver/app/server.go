@@ -159,6 +159,7 @@ func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) erro
 	}
 
 	// mingregister-配置服务路由(202005101331): kube-apiserver服务运行前的准备，如设置健康检查和存活检查等操作。
+	// mingregister-配置服务路由(202005101331): PrepareRun prepares the aggregator to run, by setting up the OpenAPI spec and calling the generic PrepareRun.
 	prepared, err := server.PrepareRun()
 	if err != nil {
 		return err
