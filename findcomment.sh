@@ -6,5 +6,6 @@ KEYWORD='mingregister'
 # KEYWORD='mingregister-AccessControl'
 # KEYWORD='mingregister-iptables'
 # KEYWORD='mingregister-options'
+# KEYWORK='More info:'
 
 find ./ -type f -iname *.go | xargs fgrep "${KEYWORD}"

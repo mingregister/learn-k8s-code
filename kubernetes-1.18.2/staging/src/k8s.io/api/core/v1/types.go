@@ -2457,6 +2457,8 @@ const (
 	PodReasonUnschedulable = "Unschedulable"
 )
 
+// mingregister-PodStatus(202006192228): https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podcondition-v1-core
+// A Pod has a PodStatus, which has an array of PodConditions through which the Pod has or has not passed. Each element of the PodCondition array has six possible fields:
 // PodCondition contains details for the current condition of this pod.
 type PodCondition struct {
 	// Type is the type of the condition.
@@ -3419,6 +3421,7 @@ type EphemeralContainer struct {
 	TargetContainerName string `json:"targetContainerName,omitempty" protobuf:"bytes,2,opt,name=targetContainerName"`
 }
 
+// mingregister-PodStatus(202006192228): https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podstatus-v1-core
 // PodStatus represents information about the status of a pod. Status may trail the actual
 // state of a system, especially if the node that hosts the pod cannot contact the control
 // plane.
