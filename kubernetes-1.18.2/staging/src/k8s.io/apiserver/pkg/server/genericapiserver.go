@@ -374,7 +374,7 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 	var stoppedCh <-chan struct{}
 	if s.SecureServingInfo != nil && s.Handler != nil {
 		var err error
-		// mingregister-配置服务路由(202005101708): 
+		// mingregister-配置服务路由(202005101708):
 		stoppedCh, err = s.SecureServingInfo.Serve(s.Handler, s.ShutdownTimeout, internalStopCh)
 		if err != nil {
 			close(internalStopCh)
@@ -472,6 +472,7 @@ func (s *GenericAPIServer) InstallAPIGroups(apiGroupInfos ...*APIGroupInfo) erro
 	for _, apiGroupInfo := range apiGroupInfos {
 		// mingregister-配置服务路由(202005101400): 设置APIGroupPrefix即api根路径为/apis，随后转入下一步逻辑
 		// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiserver\pkg\server\config.go
+		// /apis/<group>/<version>/<resource> ~~ /apis/batch/v1/jobs
 		if err := s.installAPIResources(APIGroupPrefix, apiGroupInfo, openAPIModels); err != nil {
 			return fmt.Errorf("unable to install api resources: %v", err)
 		}

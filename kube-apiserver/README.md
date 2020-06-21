@@ -57,3 +57,25 @@ APIGroupInfo位于k8s.io/apiserver/pkg/server/generaticapiserver.go，定义了�
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/DWUm33nzh3yKMIbpfDU9FBtC9fib1V2aaXlFicNtbm1UI7EOFibebzLv7qA3PTvMiatPl3TYiaalWB1BEHY42zdBbBw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
+
+
+### group/version/resource
+yaml文件中的kind种类的定义都可以在这个文件夹中找到: **/opt/git/learn-k8s-code/kubernetes-1.18.2/staging/src/k8s.io/api/** 
+
+
+/apis/batch/v1/jobs
+    其中：batch 是Group
+          v1 是Version
+          job 是Resource
+在 kubernetes-1.14.0\staging\src\k8s.io\api\batch\v1\types.go 可以找到Job的资源定义
+   kubernetes-1.14.0\pkg\controller\job\job_controller.go 可以找到Job的内建控制器的定义
+类似：
+    在 kubernetes-1.14.0\staging\src\k8s.io\api\extensions\v1beta1\types.go 可以找到Deployment的资源定义
+       kubernetes-1.14.0\pkg\controller\deployment\deployment_controller.go可以找到Deployment的内建控制器的定义。
+
+/apis/crdstart.idevz.org/v1alpha1/Dcreater
+        其中：crdstart.idevz.org 是Group
+              v1alpha1 是Version
+              Dcreater 是Resource
+
+代码定义在这里：/opt/git/learn-k8s-code/kubernetes-1.18.2/staging/src/k8s.io/apiserver/pkg/server/genericapiserver.go

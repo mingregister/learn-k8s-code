@@ -137,6 +137,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		GenericAPIServer: genericServer,
 	}
 
+	// mingregister-配置服务路由(202005101347): MergedResourceConfig indicates which groupVersion enabled and its resources enabled/disabled.
 	apiResourceConfig := c.GenericConfig.MergedResourceConfig
 	// mingregister-配置服务路由(202005101347): 将这组api的GroupName设置为apiextensions.k8s.io
 	// learn-k8s-code\kubernetes-1.18.2\staging\src\k8s.io\apiextensions-apiserver\pkg\apis\apiextensions\register.go
@@ -162,7 +163,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		apiGroupInfo.VersionedResourcesStorageMap[v1.SchemeGroupVersion.Version] = storage
 	}
 
-	// mingregister-配置服务路由(202005101348): 转入下一步逻辑
+	// mingregister-配置服务路由(202005101348): 转入下一步逻辑：安装APIGroup~~/apis/<group>/<version>/<resource>
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err
 	}
