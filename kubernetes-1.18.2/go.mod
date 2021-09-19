@@ -82,7 +82,7 @@ require (
 	github.com/lpabon/godbc v0.1.1 // indirect
 	github.com/mattn/go-shellwords v1.0.5 // indirect
 	github.com/mesos/mesos-go v0.0.9 // indirect
-	github.com/miekg/dns v1.1.4
+	github.com/miekg/dns v1.1.25
 	github.com/mindprince/gonvml v0.0.0-20190828220739-9ebdce4bb989 // indirect
 	github.com/mistifyio/go-zfs v2.1.1+incompatible // indirect
 	github.com/mohae/deepcopy v0.0.0-20170603005431-491d3605edfb // indirect
@@ -557,6 +557,7 @@ replace (
 	k8s.io/kube-scheduler => ./staging/src/k8s.io/kube-scheduler
 	k8s.io/kubectl => ./staging/src/k8s.io/kubectl
 	k8s.io/kubelet => ./staging/src/k8s.io/kubelet
+	k8s.io/kubernetes => /opt/data/code/learn-k8s-code/kubernetes-1.18.2
 	k8s.io/legacy-cloud-providers => ./staging/src/k8s.io/legacy-cloud-providers
 	k8s.io/metrics => ./staging/src/k8s.io/metrics
 	k8s.io/repo-infra => k8s.io/repo-infra v0.0.1-alpha.1
@@ -580,5 +581,4 @@ replace (
 	sigs.k8s.io/yaml => sigs.k8s.io/yaml v1.2.0
 	sourcegraph.com/sqs/pbtypes => sourcegraph.com/sqs/pbtypes v0.0.0-20180604144634-d3ebe8f20ae4
 	vbom.ml/util => vbom.ml/util v0.0.0-20160121211510-db5cfe13f5cc
-	k8s.io/kubernetes => /opt/data/code/learn-k8s-code/kubernetes-1.18.2
 )
