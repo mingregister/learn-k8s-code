@@ -580,4 +580,5 @@ replace (
 	sigs.k8s.io/yaml => sigs.k8s.io/yaml v1.2.0
 	sourcegraph.com/sqs/pbtypes => sourcegraph.com/sqs/pbtypes v0.0.0-20180604144634-d3ebe8f20ae4
 	vbom.ml/util => vbom.ml/util v0.0.0-20160121211510-db5cfe13f5cc
+	k8s.io/kubernetes => /opt/data/code/learn-k8s-code/kubernetes-1.18.2
 )
